@@ -3,7 +3,7 @@ set -euo pipefail
 
 # scripts constants
 CONFIG_PATH=~/.config/shell-utilites/ignore-genrc
-SCRIPT_VERSION=0.0.0
+SCRIPT_VERSION=1.0.0
 
 # default config variables
 data_path=~/.local/share/shell-utilites/ignore-gen/
