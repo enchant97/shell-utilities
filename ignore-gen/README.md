@@ -13,6 +13,7 @@ ignore-gen [OPTIONS]
 | update | update the gitignore repo                      |
 | ls     | list all possible ignore files                 |
 | cp     | copy a ignore file to a path                   |
+| cat    | output ignore file to STDOUT                   |
 | clean  | clean the configuration and data directory     |
 
 > Before you use this script you will need to run `init` to create the required files/folders.
@@ -21,7 +22,7 @@ ignore-gen [OPTIONS]
 
 ``` bash
 ignore-gen init
-ignore-gen cp python .
+ignore-gen cp Python .
 ```
 
 This will copy a python `.gitignore` to the current directory
