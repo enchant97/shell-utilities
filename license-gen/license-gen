@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import requests
+from dotenv import dotenv_values
 
 USER_HOME = os.environ["HOME"]
 CONFIG_PATH = Path(USER_HOME, ".config/shell-utilites/license-genrc")
@@ -57,6 +58,14 @@ def clean():
         CONFIG_PATH.unlink()
 
 
+def write_config():
+    """
+    write a new or create a configuration file
+    """
+    with open(CONFIG_PATH, "w") as fo:
+        fo.write(f"data_path={DATA_PATH}")
+
+
 def init_script():
     """
     create required files/directories
@@ -64,7 +73,8 @@ def init_script():
     # create required directories
     DATA_PATH.mkdir(parents=True, exist_ok=True)
     STORED_LICENSES_PATH.mkdir(parents=True, exist_ok=True)
-
+    # create new config file
+    write_config()
     # fetch new license list
     update()
 
@@ -104,6 +114,8 @@ def main():
     """
     main entry point for script
     """
+    global DATA_PATH, LICENSE_LIST_PATH, STORED_LICENSES_PATH
+
     if len(sys.argv) < 2:
         return
 
@@ -111,8 +123,24 @@ def main():
 
     if option == "init":
         init_script()
-    elif option == "help":
-        pass
+        return
+
+    # load the config
+    if CONFIG_PATH.exists():
+        loaded_config = dotenv_values(CONFIG_PATH)
+        DATA_PATH = Path(loaded_config["data_path"])
+        LICENSE_LIST_PATH = DATA_PATH / "license-list.json"
+        STORED_LICENSES_PATH = DATA_PATH / "licenses"
+
+    if option == "help":
+        print("Usage:\n")
+        print("init \t create configuration file and get license list")
+        print("update \t update the license list")
+        print("ls \t list all license files")
+        print("cp \t copy a license to a path")
+        print("cat \t output license file to STDOUT")
+        print("clean \t clean the configuration and data directory")
+
     elif option == "update":
         update()
     elif option == "ls":
