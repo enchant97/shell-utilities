@@ -1,0 +1,131 @@
+#!/usr/bin/env python
+import json
+import os
+import shutil
+import sys
+from pathlib import Path
+
+import requests
+
+USER_HOME = os.environ["HOME"]
+CONFIG_PATH = Path(USER_HOME, ".config/shell-utilites/license-genrc")
+DATA_PATH = Path(USER_HOME, ".local/share/shell-utilites/license-gen")
+LICENSE_LIST_PATH = DATA_PATH / "license-list.json"
+STORED_LICENSES_PATH = DATA_PATH / "licenses"
+
+LOADED_LICENSES = []
+
+
+def request_licenses_list():
+    """
+    get commonly used licenses
+    """
+    r = requests.get("https://api.github.com/licenses")
+    return r.json()
+
+
+def request_license(key):
+    """
+    get a specific license
+
+        :param key: the license key
+    """
+    r = requests.get("https://api.github.com/licenses/" + key)
+    return r.json()
+
+
+def update():
+    """
+    update the licenses list and clear cache
+    """
+    global LOADED_LICENSES
+    LOADED_LICENSES = request_licenses_list()
+    with open(LICENSE_LIST_PATH, "w") as fo:
+        json.dump(LOADED_LICENSES, fo)
+
+    # get rid of cached licenses
+    shutil.rmtree(STORED_LICENSES_PATH)
+    STORED_LICENSES_PATH.mkdir(parents=True, exist_ok=True)
+
+
+def clean():
+    """
+    delete cached data and config
+    """
+    shutil.rmtree(DATA_PATH, ignore_errors=True)
+    if CONFIG_PATH.exists():
+        CONFIG_PATH.unlink()
+
+
+def init_script():
+    """
+    create required files/directories
+    """
+    # create required directories
+    DATA_PATH.mkdir(parents=True, exist_ok=True)
+    STORED_LICENSES_PATH.mkdir(parents=True, exist_ok=True)
+
+    # fetch new license list
+    update()
+
+
+def load_licenses_list():
+    """
+    load the licenses list file
+    """
+    global LOADED_LICENSES
+    with open(LICENSE_LIST_PATH, "r") as fo:
+        LOADED_LICENSES = json.load(fo)
+
+
+def list_licenses():
+    """
+    output the licenses list
+    """
+    for license_ in LOADED_LICENSES:
+        print(license_["key"])
+
+
+def get_license(key):
+    """
+    get the license
+    """
+    # TODO add caching feature
+    the_license = request_license(key)
+    return the_license
+
+
+def main():
+    """
+    main entry point for script
+    """
+    if len(sys.argv) < 2:
+        return
+
+    option = sys.argv[1]
+
+    if option == "init":
+        init_script()
+    elif option == "help":
+        pass
+    elif option == "update":
+        update()
+    elif option == "ls":
+        load_licenses_list()
+        list_licenses()
+    elif option == "cp":
+        write_path = Path(sys.argv[3]) / "LICENSE"
+        the_license = get_license(sys.argv[2])
+        with open(write_path, "w") as fo:
+            fo.write(the_license["body"])
+    elif option == "cat":
+        the_license = get_license(sys.argv[2])
+        print(the_license["body"])
+    elif option == "clean":
+        clean()
+    else:
+        print(f"unknown option: {option}, use '{sys.argv[0]} help' to get help")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
