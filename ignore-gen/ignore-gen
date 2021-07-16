@@ -60,7 +60,7 @@ elif [ $arg1 == "ls" ] ; then
 elif [ $arg1 == "cp" ] ; then
     ignore_name=$2
     cp_to=${3-.}
-    ignore_path=$(find $ignore_repo_local -type d -name .git -prune -false -o -type f -name "${ignore_name}.gitignore")
+    ignore_path=$(find $ignore_repo_local -type d -name .git -prune -false -o -type f -iname "${ignore_name}.gitignore")
     if [ $ignore_path ] ; then
         cp $ignore_path "${cp_to}/.gitignore"
     else
@@ -68,7 +68,7 @@ elif [ $arg1 == "cp" ] ; then
     fi
 elif [ $arg1 == "cat" ] ; then
     ignore_name=$2
-    ignore_path=$(find $ignore_repo_local -type d -name .git -prune -false -o -type f -name "${ignore_name}.gitignore")
+    ignore_path=$(find $ignore_repo_local -type d -name .git -prune -false -o -type f -iname "${ignore_name}.gitignore")
     if [ $ignore_path ] ; then
         cat $ignore_path
     else
