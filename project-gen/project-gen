@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# scripts constants
+CONFIG_PATH=~/.config/shell-utilites/project-genrc
+
+# default config variables
+default_license=gpl-3.0
+default_ignore=Python
+projects_path=~/Projects
+ignore_gen_path=ignore-gen
+license_gen_path=license-gen
+
+init_config() {
+    # create config file
+    mkdir -p ~/.config/shell-utilites
+    cat > "$CONFIG_PATH" <<EOL
+default_license=${default_license}
+default_ignore=${default_ignore}
+projects_path=${projects_path}
+ignore_gen_path=${ignore_gen_path}
+license_gen_path=${license_gen_path}
+EOL
+}
+
+load_config() {
+    # load/create config file
+    if [ -f "$CONFIG_PATH" ] ; then
+        . "$CONFIG_PATH"
+    else
+        echo "config was not found at: $CONFIG_PATH"
+        exit 1
+    fi
+}
+
+arg1=${1-init}
+
+if [ $arg1 == "init" ] ; then
+    init_config
+    exit 0
+elif [ $arg1 == "help" ] ; then
+    echo -e "Usage:\n"
+    exit 0
+fi
+
+load_config
+
+if [ $arg1 == "new" ] ; then
+    project_name=$2
+    project_path="${projects_path}/${project_name}"
+
+    if [ -d "$project_path" ] ; then
+        echo "project already exists with that name"
+        exit 1
+    fi
+
+    mkdir -p "$project_path"
+    git init "$project_path"
+    touch "${project_path}/README.md"
+
+    eval "$ignore_gen_path cp $default_ignore $project_path"
+    eval "$license_gen_path cp $default_license $project_path"
+
+    echo "project created: ${project_name}"
+else
+    echo "unknown argument $arg1, use '$0 help' to get help."
+    exit 1
+fi
