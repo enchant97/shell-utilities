@@ -90,8 +90,13 @@ def get_license(key):
     """
     get the license
     """
-    # TODO add caching feature
+    store_fn = STORED_LICENSES_PATH / f"{key}.json"
+    if store_fn.exists():
+        with open(store_fn, "r") as fo:
+            return json.load(fo)
     the_license = request_license(key)
+    with open(store_fn, "w") as fo:
+        json.dump(the_license, fo)
     return the_license
 
 
