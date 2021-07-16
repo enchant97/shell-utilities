@@ -48,6 +48,7 @@ elif [ $arg1 == "help" ] ; then
     echo -e "ls \t list all possible ignore files"
     echo -e "cp \t copy a ignore file to a path"
     echo -e "cat \t output ignore file to STDOUT"
+    echo -e "less \t same as cat, but instead uses less command"
     echo -e "clean \t clean the config and data directory"
     exit 0
 fi
@@ -57,7 +58,7 @@ load_config
 if [ $arg1 == "update" ] ; then
     git --git-dir="${ignore_repo_local}/.git" --work-tree="$ignore_repo_local" pull
 elif [ $arg1 == "ls" ] ; then
-    find $ignore_repo_local -type d -name .git -prune -false -o -type f -name "*.gitignore" -exec basename \{\} .gitignore \;
+    find $ignore_repo_local -type d -name .git -prune -false -o -type f -name "*.gitignore" -exec basename \{\} .gitignore \; | less
 elif [ $arg1 == "cp" ] ; then
     ignore_name=$2
     cp_to=${3-.}
@@ -72,6 +73,14 @@ elif [ $arg1 == "cat" ] ; then
     ignore_path=$(find $ignore_repo_local -type d -name .git -prune -false -o -type f -iname "${ignore_name}.gitignore")
     if [ $ignore_path ] ; then
         cat $ignore_path
+    else
+        echo "cannot find gitignore named: $2"
+    fi
+elif [ $arg1 == "less" ] ; then
+    ignore_name=$2
+    ignore_path=$(find $ignore_repo_local -type d -name .git -prune -false -o -type f -iname "${ignore_name}.gitignore")
+    if [ $ignore_path ] ; then
+        less $ignore_path
     else
         echo "cannot find gitignore named: $2"
     fi

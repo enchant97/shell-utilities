@@ -14,6 +14,7 @@ ignore-gen [OPTIONS]
 | ls     | list all possible ignore files                 |
 | cp     | copy a ignore file to a path                   |
 | cat    | output ignore file to STDOUT                   |
+| less   | same as cat, but instead uses less command     |
 | clean  | clean the configuration and data directory     |
 
 > Before you use this script you will need to run `init` to create the required files/folders.
