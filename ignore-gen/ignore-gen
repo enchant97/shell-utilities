@@ -47,6 +47,7 @@ elif [ $arg1 == "help" ] ; then
     echo -e "update \t update the gitignore repo"
     echo -e "ls \t list all possible ignore files"
     echo -e "cp \t copy a ignore file to a path"
+    echo -e "cat \t output ignore file to STDOUT"
     echo -e "clean \t clean the config and data directory"
     exit 0
 fi
