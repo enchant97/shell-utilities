@@ -37,31 +37,73 @@ arg1=${1-init}
 
 if [ $arg1 == "init" ] ; then
     init_config
+    echo "created config file at: $CONFIG_PATH"
     exit 0
 elif [ $arg1 == "help" ] ; then
     echo -e "Usage:\n"
+    echo -e "init \t create required config file"
+    echo -e "new <project name> \t create a new project"
+    echo -e "\t -i <ignore name> \t override default ignore file"
+    echo -e "\t -l <license name> \t override default license file"
+    echo -e "ignore-gen \t call and pass arguments to ignore_gen script"
+    echo -e "license-gen \t call and pass arguments to license_gen script"
+    echo -e "clean \t clean the config file"
     exit 0
 fi
 
 load_config
 
 if [ $arg1 == "new" ] ; then
+    # get required arguments
     project_name=$2
     project_path="${projects_path}/${project_name}"
 
+    # does not allow overwriting an existing project/folder
     if [ -d "$project_path" ] ; then
         echo "project already exists with that name"
         exit 1
     fi
 
+    # remove the 'new <project name>' from arguments
+    shift
+    shift
+
+    # get any extra options
+    while getopts :i:l: opt; do
+        case ${opt} in
+            i )
+                default_ignore=$OPTARG;;
+            l )
+                default_license=$OPTARG;;
+            \? )
+                echo "invalid option: -$OPTARG"
+                exit 1;;
+            : )
+                echo "option -$OPTARG requires an argument"
+                exit 1;;
+        esac
+    done
+
+    # make project
     mkdir -p "$project_path"
     git init "$project_path"
     touch "${project_path}/README.md"
 
+    # create extra files using external scripts
     eval "$ignore_gen_path cp $default_ignore $project_path"
     eval "$license_gen_path cp $default_license $project_path"
 
     echo "project created: ${project_name}"
+elif [ $arg1 == "ignore-gen" ] ; then
+    shift
+    eval "$ignore_gen_path $@"
+elif [ $arg1 == "license-gen" ] ; then
+    shift
+    eval "$license_gen_path $@"
+elif [ $arg1 == "clean" ] ; then
+    # remove the config file
+    rm "$CONFIG_PATH"
+    echo "cleaned config file"
 else
     echo "unknown argument $arg1, use '$0 help' to get help."
     exit 1
