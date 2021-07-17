@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo -e "Usage:\n"
+    echo -e "<input dir> <output dir> [<archive type>]\n"
+    echo "valid archive types:"
+    git archive -l
+}
+
+# get opts
+while getopts :h opt; do
+    case ${opt} in
+        h )
+            usage
+            exit 0;;
+        \? )
+            echo "invalid option: -$OPTARG"
+            exit 1;;
+        : )
+            echo "option -$OPTARG requires an argument"
+            exit 1;;
+    esac
+done
+
+if [ $# -lt 2 ] ; then
+    echo "not enough arguments, use -h to get help"
+    exit 1
+elif [ $# -gt 3 ] ; then
+    echo "too many arguments, use -h to get help"
+    exit 1
+fi
+
+input_dir=$1
+output_dir=$2
+output_type=${3-tar.gz}
+bare_name="bare"
+
+input_dir_length=${#input_dir}
+
+# find -path "*.git/*" -prune -false -o -type d -name "*.git"
+echo "finding git bare repos"
+# this requires bash >=4.4-alpha
+mapfile -d $'\0' found_dirs < <(find "${input_dir}" -path "*.git/*" -prune -false -o ! -name "bare.git" -type d -name "*.git" -print0)
+
+echo "found:"
+echo ${found_dirs[*]}
+
+for curr_dir in "${found_dirs[@]}"
+do
+    echo "archiving: $curr_dir"
+
+    # create required directory
+    curr_dir_length=${#curr_dir}
+    output_path_part=${curr_dir:input_dir_length:curr_dir_length}
+    actual_output_path="${output_dir}/${output_path_part%.git}"
+    mkdir -p "$(dirname "${actual_output_path}")"
+
+    # do archive
+    git archive --remote="${curr_dir}" -o "${actual_output_path}.${output_type}" HEAD
+    echo "done archiving: $curr_dir"
+done
+
+echo "done"
