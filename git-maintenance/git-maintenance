@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo -e "Usage:\n"
+    echo -e "<input dir>\n"
+}
+
+# get opts
+while getopts :h opt; do
+    case ${opt} in
+        h )
+            usage
+            exit 0;;
+        \? )
+            echo "invalid option: -$OPTARG"
+            exit 1;;
+        : )
+            echo "option -$OPTARG requires an argument"
+            exit 1;;
+    esac
+done
+
+if [ $# -ne 1 ] ; then
+    echo "not enough arguments, use -h to get help"
+    exit 1
+
+input_dir=$1
+bare_name="bare"
+
+input_dir_length=${#input_dir}
+
+echo "finding git bare repos"
+# this requires bash >=4.4-alpha
+mapfile -d $'\0' found_dirs < <(find "${input_dir}" -path "*.git/*" -prune -false -o ! -name "bare.git" -type d -name "*.git" -print0)
+
+echo "found:"
+echo ${found_dirs[*]}
+
+for curr_dir in "${found_dirs[@]}"
+do
+    echo "starting maintenance on: $curr_dir"
+    git -C "${curr_dir}" maintenance run
+    echo "done maintenance on: $curr_dir"
+done
+
+echo "done"
