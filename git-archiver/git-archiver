@@ -38,7 +38,6 @@ bare_name="bare"
 
 input_dir_length=${#input_dir}
 
-# find -path "*.git/*" -prune -false -o -type d -name "*.git"
 echo "finding git bare repos"
 # this requires bash >=4.4-alpha
 mapfile -d $'\0' found_dirs < <(find "${input_dir}" -path "*.git/*" -prune -false -o ! -name "bare.git" -type d -name "*.git" -print0)
