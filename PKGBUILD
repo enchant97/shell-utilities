@@ -4,7 +4,7 @@
 # then please put 'unknown'.
 
 # Maintainer: Leo Spratt <contact@enchantedcode.co.uk>
-pkgname=shell-utilites-git
+pkgname=shell-utilities-git
 pkgver=1.0.r17.420e6a5
 pkgrel=1
 epoch=
