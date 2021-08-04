@@ -1,6 +1,7 @@
 install:
-	cp ignore-gen/ignore-gen "${DESTDIR}"
-	cp license-gen/license-gen "${DESTDIR}"
-	cp project-gen/project-gen "${DESTDIR}"
-	cp git-archiver/git-archiver "${DESTDIR}"
-	cp git-maintenance/git-maintenance "${DESTDIR}"
+	cp -f ignore-gen/ignore-gen license-gen/license-gen project-gen/project-gen git-archiver/git-archiver git-maintenance/git-maintenance "${DESTDIR}"
+	chmod 755 "${DESTDIR}/ignore-gen"
+	chmod 755 "${DESTDIR}/license-gen"
+	chmod 755 "${DESTDIR}/project-gen"
+	chmod 755 "${DESTDIR}/git-archiver"
+	chmod 755 "${DESTDIR}/git-maintenance"
