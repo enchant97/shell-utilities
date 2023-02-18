@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+#
+# Swarm Assist - A unified command line interface for managing a Docker Swarm cluster.
+#
+
+set -euo pipefail
+
+STACK_CONF_ROOT="${STACK_CONF_ROOT:-~/stack.yml.d}"
+# Expand ~ to $HOME
+STACK_CONF_ROOT="${STACK_CONF_ROOT/#\~/$HOME}"
+# Get absolute path and resolve symlinks
+STACK_CONF_ROOT=$(realpath "$STACK_CONF_ROOT")
+
+function echoerr { echo "$@" 1>&2; }
+
+function stack_deploy {
+    service="$1"
+    docker stack deploy -c "${STACK_CONF_ROOT}/${service}.yml" $service
+}
+
+function service_update {
+    service="$1"
+    docker service update --force $service
+}
+
+function stack_rm {
+    service="$1"
+    docker stack rm --force $service
+}
+
+function service_ls { docker service ls }
+
+function node_ls { docker node ls }
+
+function echo_help {
+    echo "Usage: swarm-assist <command> [args...]"
+    echo "Commands:"
+    echo "  deploy    [service]  Deploy a service"
+    echo "  update    [service]  Update a service (forced)"
+    echo "  rm        [service]  Remove a service (forced)"
+    echo "  services             List services"
+    echo "  nodes                List nodes"
+    echo "  help                 Show this help"
+}
+
+# check if stack root exists
+if [[ ! -d "$STACK_CONF_ROOT" ]]; then
+    echoerr "STACK_CONF_ROOT '$STACK_CONF_ROOT' does not exist"
+    exit 1
+fi
+
+args=("$@")
+cmd="${1:-help}"
+
+case "$cmd" in
+    "deploy")
+        stack_deploy ${args[@]:1}
+        ;;
+    "update")
+        service_update ${args[@]:1}
+        ;;
+    "rm")
+        stack_rm ${args[@]:1}
+        ;;
+    "services")
+        service_ls
+        ;;
+    "nodes")
+        node_ls
+        ;;
+    "help")
+        echo_help
+        ;;
+    *)
+        echoerr "Unknown command '$cmd'"
+        exit 1
+        ;;
+esac
