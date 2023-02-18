@@ -28,9 +28,9 @@ function stack_rm {
     docker stack rm --force $service
 }
 
-function service_ls { docker service ls }
+function service_ls { docker service ls; }
 
-function node_ls { docker node ls }
+function node_ls { docker node ls; }
 
 function echo_help {
     echo "Usage: swarm-assist <command> [args...]"
