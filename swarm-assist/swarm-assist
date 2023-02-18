@@ -41,6 +41,8 @@ function echo_help {
     echo "  services             List services"
     echo "  nodes                List nodes"
     echo "  help                 Show this help"
+    echo "Environment Variables:"
+    echo "  STACK_CONF_ROOT  ~/stack.yml.d  Where stack configs are stored"
 }
 
 # check if stack root exists
